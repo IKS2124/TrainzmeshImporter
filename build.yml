@@ -1,0 +1,44 @@
+name: Build Windows EXE
+
+# Builds TrainzMeshGUI.exe automatically using a free GitHub-hosted
+# Windows runner. No Windows PC needed on your end.
+#
+# Trigger it by:
+#   - pushing to the main branch, OR
+#   - going to the "Actions" tab on GitHub and clicking "Run workflow"
+#
+# When it finishes, open the workflow run and download the
+# "TrainzMeshGUI-windows" artifact (a zip containing the .exe).
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build executable
+        run: pyinstaller --onefile --windowed --name TrainzMeshGUI trainz_mesh_gui.py
+
+      - name: Copy TrainzMeshImporter.exe next to the built GUI
+        run: copy TrainzMeshImporter.exe dist\TrainzMeshImporter.exe
+
+      - name: Upload build as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrainzMeshGUI-windows
+          path: dist\
